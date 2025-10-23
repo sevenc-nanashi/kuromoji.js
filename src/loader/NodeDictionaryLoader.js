@@ -27,7 +27,7 @@ function createLoadModule() {
     const module = /** @vite-ignore */ require(modulePath);
     modulesCache.set(modulePath, module);
     return module;
-  }
+  };
 }
 const loadModule = createLoadModule();
 

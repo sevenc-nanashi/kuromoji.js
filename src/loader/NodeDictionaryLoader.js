@@ -24,7 +24,7 @@ function createLoadModule() {
     if (modulesCache.has(modulePath)) {
       return modulesCache.get(modulePath);
     }
-    const module = /** @vite-ignore */ require(modulePath);
+    const module = import(modulePath);
     modulesCache.set(modulePath, module);
     return module;
   };
@@ -48,20 +48,22 @@ NodeDictionaryLoader.prototype = Object.create(DictionaryLoader.prototype);
  * @param {NodeDictionaryLoader~onLoad} callback Callback function
  */
 NodeDictionaryLoader.prototype.loadArrayBuffer = function (file, callback) {
-  const fs = loadModule("fs");
-  const node_zlib = loadModule("zlib");
-  fs.readFile(file, function (err, buffer) {
-    if (err) {
-      return callback(err);
-    }
-    node_zlib.gunzip(buffer, function (err2, decompressed) {
-      if (err2) {
-        return callback(err2);
-      }
-      var typed_array = new Uint8Array(decompressed);
-      callback(null, typed_array.buffer);
-    });
-  });
+  Promise.all([loadModule("fs"), loadModule("zlib")]).then(
+    ([fs, node_zlib]) => {
+      fs.readFile(file, function (err, buffer) {
+        if (err) {
+          return callback(err);
+        }
+        node_zlib.gunzip(buffer, function (err2, decompressed) {
+          if (err2) {
+            return callback(err2);
+          }
+          var typed_array = new Uint8Array(decompressed);
+          callback(null, typed_array.buffer);
+        });
+      });
+    },
+  );
 };
 
 /**

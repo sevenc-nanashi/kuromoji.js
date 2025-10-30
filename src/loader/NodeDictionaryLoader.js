@@ -65,7 +65,7 @@ NodeDictionaryLoader.prototype.loadArrayBuffer = function (file, callback) {
     },
     (err) => {
       callback(err);
-    }
+    },
   );
 };
 
